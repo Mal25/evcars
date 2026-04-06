@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AETHER | Minimalist Mobility</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --app-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #FFFFFF;
+            margin: 0;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        /* Hide scrollbars globally */
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- NAVIGATION --- */
+        .nav-container {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 100%;
+            padding: 0 1rem;
+        }
+
+        @media (max-width: 767px) {
+            .nav-container {
+                bottom: env(safe-area-inset-bottom, 1.5rem);
+                top: auto;
+            }
+        }
+        @media (min-width: 768px) {
+            .nav-container { 
+                top: 1.5rem; 
+                width: auto; 
+                padding: 0;
+            }
+        }
+
+        .liquid-glass-pill {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: rgba(107, 107, 107, 0.7);
+            backdrop-filter: blur(30px) saturate(210%);
+            -webkit-backdrop-filter: blur(30px) saturate(210%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            /*box-shadow: 0 12px 40px rgba(0,0,0,0.6);*/
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .liquid-glass-pill { 
+                padding: 0.6rem 1rem; 
+                width: auto;
+            }
+        }
+
+        .brand-logo {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            padding: 0 1.25rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .brand-logo { 
+                display: block;
+                font-size: 0.85rem; 
+                margin-right: 0.5rem; 
+            }
+        }
+
+        .nav-links-wrapper {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+        }
+
+        @media (min-width: 768px) {
+            .nav-links-wrapper {
+                width: auto;
+                justify-content: flex-start;
+            }
+        }
+
+        .nav-link {
+            font-size: 10px;
+            font-weight: 500;
+            padding: 0.8rem 1rem;
+            border-radius: 100px;
+            color: rgba(255, 255, 255, 0.45);
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            flex: 1;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .nav-link { 
+                font-size: 11px; 
+                padding: 0.6rem 1.25rem; 
+                flex: none;
+            }
+        }
+
+        .nav-link.active {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .mobile-header-logo {
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 500;
+            letter-spacing: 0.6em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 600;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-header-logo { display: none; }
+        }
+
+        /* --- PAGE SYSTEM --- */
+        .page-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            overflow-y: auto;
+            background: #000;
+            z-index: 10;
+        }
+
+        .page-view.active {
+            display: block;
+            animation: pageIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes pageIn {
+            from { opacity: 0; transform: scale(1.05); filter: blur(20px); }
+            to { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        /* --- SNAP CONTAINER --- */
+        .snap-container {
+            scroll-snap-type: y mandatory;
+            height: 100dvh;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        section.home-slide {
+            height: 100dvh;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+            background-size: cover; 
+            background-repeat: no-repeat;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18vh 1.5rem 16vh 1.5rem;
+            overflow: hidden;
+        }
+
+        @media (max-height: 700px) {
+            section.home-slide { padding-top: 15vh; padding-bottom: 15vh; }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 10vw, 4.5rem);
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 320px;
+            align-items: center;
+            z-index: 5;
+        }
+
+        @media (min-width: 768px) {
+            .btn-container { flex-direction: row; justify-content: center; gap: 1rem; max-width: 1000px; }
+        }
+
+        .action-btn {
+            position: relative;
+            width: 100%;
+            border-radius: 14px; 
+            padding: 1.1rem 0;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.2, 0, 0, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            touch-action: manipulation;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .action-btn { width: 220px; border-radius: 100px; }
+        }
+
+        .btn-white { background: #FFFFFF; color: #000; }
+        .btn-glass { 
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(15px); 
+            color: #FFF; 
+            border: 1px solid rgba(255,255,255,0.15); 
+        }
+
+        .action-btn:active { transform: scale(0.96); opacity: 0.8; }
+
+        .close-header {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            padding: calc(env(safe-area-inset-top, 0px) + 1.5rem) 1.5rem 1.5rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+        }
+
+        .close-circle {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .close-circle:active { transform: scale(0.9); }
+
+        /* --- FOOTER --- */
+        .footer-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 0 1.5rem calc(env(safe-area-inset-bottom, 0px) + 100px) 1.5rem; 
+        }
+
+        .liquid-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px; 
+            width: 100%;
+            max-width: 600px;
+        }
+
+        @media (min-width: 768px) {
+            .liquid-footer { 
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 3rem; 
+                padding: 1.25rem 4rem; 
+                width: auto; 
+                border-radius: 100px; 
+            }
+        }
+
+        .footer-link {
+            font-size: 10px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover { color: #FFFFFF; }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header-logo" id="mobile-logo">Aether</div>
+
+    <!-- GLOBAL NAVIGATION -->
+    <div class="nav-container" id="main-nav">
+        <nav class="liquid-glass-pill">
+            <div class="brand-logo" onclick="resetHome()">Aether</div>
+            <div class="nav-links-wrapper">
+                <a href="javascript:void(0)" onclick="scrollToSection('alpha')" class="nav-link active" data-sec="alpha">Alpha</a>
+                <a href="javascript:void(0)" onclick="scrollToSection('omega')" class="nav-link" data-sec="omega">Omega</a>
+                <a href="javascript:void(0)" onclick="scrollToSection('epsilon')" class="nav-link" data-sec="epsilon">Epsilon</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- MAIN HOME VIEW -->
+    <div id="page-home" class="page-view active">
+        <div id="snap-container" class="snap-container">
+            <!-- Model Alpha -->
+            <section id="alpha" class="home-slide" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 40%, rgba(0,0,0,0.6)), url('car1.png');">
+                <div class="text-center">
+                    <h1 class="hero-title">Model Alpha</h1>
+                    <p class="hero-subtitle">Aerodynamic Excellence</p>
+                </div>
+                <div class="btn-container">
+                    <div class="action-btn btn-white" onclick="showPage('details-alpha')">Explore</div>
+                    <div class="action-btn btn-glass">Custom Order</div>
+                </div>
+            </section>
+
+            <!-- Model Omega -->
+            <section id="omega" class="home-slide" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 40%, rgba(0,0,0,0.6)), url('car2.png');">
+                <div class="text-center">
+                    <h1 class="hero-title">Model Omega</h1>
+                    <p class="hero-subtitle">Vast Horizons</p>
+                </div>
+                <div class="btn-container">
+                    <div class="action-btn btn-white" onclick="showPage('details-omega')">Explore</div>
+                    <div class="action-btn btn-glass">Custom Order</div>
+                </div>
+            </section>
+
+            <!-- Model Epsilon -->
+            <section id="epsilon" class="home-slide" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent 40%, rgba(0,0,0,0.6)), url('car3.png');">
+                <div class="text-center">
+                    <h1 class="hero-title">Model Epsilon</h1>
+                    <p class="hero-subtitle">Urban Agility</p>
+                </div>
+                <div class="btn-container">
+                    <div class="action-btn btn-white" onclick="showPage('details-epsilon')">Explore</div>
+                    <div class="action-btn btn-glass">Custom Order</div>
+                </div>
+            </section>
+
+            <!-- FINAL SECTION -->
+            <section id="drive" class="home-slide bg-black" style="padding-top: 0; background-image: none;">
+                <div class="flex-grow flex flex-col items-center justify-center px-4 pt-10">
+                    <div class="text-center">
+                        <h1 class="hero-title mb-6">Drive Aether</h1>
+                        <div class="action-btn btn-white mx-auto" style="max-width: 280px;" onclick="showPage('demo-drive')">
+                            Demo Drive
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-wrapper">
+                    <footer class="liquid-footer">
+                        <a href="javascript:void(0)" class="footer-link" onclick="showPage('privacy')">Privacy</a>
+                        <a href="javascript:void(0)" class="footer-link" onclick="showPage('contact')">Contact</a>
+                        <a href="javascript:void(0)" class="footer-link" onclick="showPage('careers')">Careers</a>
+                        <span class="footer-link cursor-default opacity-20">Aether © 2026</span>
+                    </footer>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- CAR DETAIL PAGES -->
+    <div id="page-details-alpha" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <h1 class="hero-title">Model Alpha</h1>
+            <p class="max-w-md opacity-50 mt-4 leading-relaxed text-sm">Aerodynamic precision meets unmatched electrical efficiency. Designed for the long road with a drag coefficient of 0.208 Cd.</p>
+        </div>
+    </div>
+
+    <div id="page-details-omega" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <h1 class="hero-title">Model Omega</h1>
+            <p class="max-w-md opacity-50 mt-4 leading-relaxed text-sm">Uncompromising space and capability. Adventure rewritten for the sustainable era with adaptive air suspension and dual-motor AWD.</p>
+        </div>
+    </div>
+
+    <div id="page-details-epsilon" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <h1 class="hero-title">Model Epsilon</h1>
+            <p class="max-w-md opacity-50 mt-4 leading-relaxed text-sm">The ultimate urban companion. Agility, intelligence, and zero emissions. Small footprint, infinite impact.</p>
+        </div>
+    </div>
+
+    <!-- UTILITY PAGES -->
+    <div id="page-demo-drive" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <span class="hero-subtitle text-white/40 mb-2">The Experience</span>
+            <h1 class="hero-title">Demo Drive</h1>
+            <p class="max-w-sm opacity-50 mt-4 mb-10 leading-relaxed text-sm">Schedule your encounter with the future of mobility. Available at select showrooms worldwide.</p>
+            <div class="action-btn btn-white mb-4" style="max-width: 300px;" onclick="handleDemoRequest()">
+                <span id="demo-btn-text">Confirm Interest</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-privacy" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <h1 class="hero-title">Privacy</h1>
+            <div class="max-w-lg text-left opacity-50 mt-8 space-y-6 text-sm leading-relaxed">
+                <p>At Aether, your data is as secure as our vehicles. We prioritize end-to-end encryption for all vehicle-to-cloud communications.</p>
+                <p>We do not sell your personal driving data to third parties. Every byte collected is used to enhance your safety and vehicle performance.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-contact" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <h1 class="hero-title">Contact</h1>
+            <div class="mt-8 space-y-4">
+                <p class="text-xl font-medium">Global Support</p>
+                <p class="opacity-40 text-sm tracking-widest">+1 (800) AETHER-0</p>
+                <p class="opacity-40 text-sm tracking-widest">mission@aether.com</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-careers" class="page-view bg-zinc-950">
+        <div class="close-header"><div class="close-circle" onclick="showPage('home')">✕</div></div>
+        <div class="flex flex-col items-center justify-center min-h-[80vh] text-center px-6">
+            <h1 class="hero-title">Careers</h1>
+            <p class="max-w-md opacity-50 mt-4 mb-8 text-sm">Join the collective redefining the boundaries of physics and design.</p>
+            <div class="grid grid-cols-1 gap-4 w-full max-w-sm">
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/10 text-left">
+                    <p class="font-bold text-[9px] uppercase tracking-widest mb-1 text-white/30">Engineering</p>
+                    <p class="text-sm font-medium">Thermal Systems Lead</p>
+                </div>
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/10 text-left">
+                    <p class="font-bold text-[9px] uppercase tracking-widest mb-1 text-white/30">Design</p>
+                    <p class="text-sm font-medium">Interface Architect</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const snapContainer = document.getElementById('snap-container');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mainNav = document.getElementById('main-nav');
+        const mobileLogo = document.getElementById('mobile-logo');
+
+        // Throttle helper for scroll performance
+        function throttle(fn, wait) {
+            let time = Date.now();
+            return function() {
+                if ((time + wait - Date.now()) < 0) {
+                    fn();
+                    time = Date.now();
+                }
+            }
+        }
+
+        function showPage(pageId) {
+            const allPages = document.querySelectorAll('.page-view');
+            allPages.forEach(page => page.classList.remove('active'));
+            
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                targetPage.scrollTop = 0;
+            }
+            
+            if (pageId === 'home') {
+                mainNav.style.opacity = "1";
+                mainNav.style.pointerEvents = "auto";
+                mainNav.style.transform = "translateX(-50%) translateY(0)";
+                if(mobileLogo) mobileLogo.style.opacity = "1";
+            } else {
+                mainNav.style.opacity = "0";
+                mainNav.style.pointerEvents = "none";
+                mainNav.style.transform = "translateX(-50%) translateY(30px)";
+                if(mobileLogo) mobileLogo.style.opacity = "0";
+            }
+        }
+
+        function resetHome() {
+            showPage('home');
+            snapContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToSection(id) {
+            const section = document.getElementById(id);
+            if (section && snapContainer) {
+                // Immediate active feedback
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('data-sec') === id);
+                });
+
+                snapContainer.scrollTo({ 
+                    top: section.offsetTop, 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+
+        function handleDemoRequest() {
+            const btnText = document.getElementById('demo-btn-text');
+            if (btnText.innerText === "Confirm Interest") {
+                btnText.innerText = "Request Sent";
+                setTimeout(() => {
+                    btnText.innerText = "Confirm Interest";
+                }, 3000);
+            }
+        }
+
+        // Precision scroll listener
+        const updateNav = () => {
+            const scrollPos = snapContainer.scrollTop;
+            const viewHeight = window.innerHeight;
+            
+            // Using a tighter threshold for section detection
+            const activeIndex = Math.floor((scrollPos + (viewHeight * 0.45)) / viewHeight);
+            const sections = ['alpha', 'omega', 'epsilon', 'drive'];
+            const currentSectionId = sections[activeIndex];
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-sec') === currentSectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        };
+
+        snapContainer.addEventListener('scroll', throttle(updateNav, 16), { passive: true });
+
+        // Correct for dynamic height issues (especially iOS address bar)
+        const setAppHeight = () => {
+            const doc = document.documentElement;
+            doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+        };
+        window.addEventListener('resize', setAppHeight);
+        window.addEventListener('load', () => {
+            setAppHeight();
+            updateNav();
+        });
+    </script>
+</body>
+</html>
